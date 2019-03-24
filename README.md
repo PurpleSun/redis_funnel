@@ -1,3 +1,15 @@
-docker build -f Dockerfile -t funnel_mgmt .
+# redis-funnel
 
-docker-compose up
+A distributed funnel system based on redis, management system included.
+
+## Installation
+
+TBA
+
+## Getting Started
+
+TBA
+
+## Author
+
+TBA

@@ -5,7 +5,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="funnel",
+    name="redis-funnel",
     url="TBD",
     version="0.0.1",
     keywords=("distributed", "funnel", "redis"),
