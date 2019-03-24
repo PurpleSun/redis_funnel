@@ -6,7 +6,7 @@ import time
 from functools import wraps
 
 
-class Funnel:
+class Funnel(object):
     def __init__(self, capacity, operations, seconds, left_quota=None, leaking_ts=None):
         self.capacity = capacity  # 漏斗容量
         self.operations = operations
@@ -15,7 +15,7 @@ class Funnel:
         self.leaking_ts = leaking_ts or time.time()  # 上一次漏水时间
         self.leaking_rate = operations / float(seconds)
 
-    def make_space(self):
+    def _make_space(self):
         now_ts = time.time()
         delta_ts = now_ts - self.leaking_ts  # 距离上一次漏水过去了多久
         delta_quota = delta_ts * self.leaking_rate  # 腾出的空间
@@ -28,7 +28,7 @@ class Funnel:
         self.leaking_ts = now_ts  # 记录漏水时间
 
     def watering(self, quota):
-        self.make_space()
+        self._make_space()
         if self.left_quota >= quota:  # 判断剩余空间是否足够
             self.left_quota -= quota
             return (
@@ -58,6 +58,7 @@ def qps(n):
             while True:
                 attempt += 1
                 ready, capacity, left_quota, interval, empty_time = funnel.watering(1)
+                print "interval: %f" % interval
                 if ready:
                     print "attempt: %s" % attempt
                     return f(*args, **kwargs)
@@ -65,5 +66,4 @@ def qps(n):
                     time.sleep(interval)
 
         return inner
-
     return outer

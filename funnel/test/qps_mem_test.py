@@ -7,7 +7,7 @@ import time
 from funnel.qps_mem import qps
 
 
-@qps(10000)
+@qps(10)
 def loop():
     print "current time is %f" % time.time()
 

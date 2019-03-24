@@ -3,10 +3,11 @@
 # Author: fanwei.zeng
 # Time: 2019/3/24 10:44
 from flask import Flask
-from flask import jsonify
 import redis
 
 from funnel.mgmt.config import REDIS
+from funnel.mgmt.decorator import api
+
 
 app = Flask(__name__)
 
@@ -15,25 +16,28 @@ r = redis.Redis(connection_pool=pool)
 
 
 @app.route("/", methods=["GET"])
+@api
 def hello():
-    rsp = {
+    data = {
         "ping": "pong",
     }
-    return jsonify(rsp)
+    return data
 
 
 @app.route("/api/group", methods=["GET"])
+@api
 def get_group_view():
     name = "funnel:groups"
     group_list = list(r.smembers(name))
     group_list.sort()
-    rsp = {
+    data = {
         "group_list": group_list,
     }
-    return jsonify(rsp)
+    return data
 
 
 @app.route("/api/group/<group>", methods=["GET"])
+@api
 def get_group_keys_view(group):
     name = 'funnel:' + group + ':keys'
     key_members = r.smembers(name)
@@ -44,31 +48,34 @@ def get_group_keys_view(group):
         funnel["name"] = key
         funnel_list.append(funnel)
     funnel_list.sort(key=lambda x: x["name"])
-    rsp = {
+    data = {
         "funnel_list": funnel_list,
         "total_items": len(funnel_list),
     }
-    return jsonify(rsp)
+    return data
 
 
 @app.route("/api/key/<key>", methods=["GET"])
+@api
 def get_key_view(key):
     funnel = r.hgetall(key)
     funnel = {key: float(value) for key, value in funnel.iteritems()}
     funnel["name"] = key
-    rsp = {
+    data = {
         "funnel": funnel,
     }
-    return jsonify(rsp)
+    return data
 
 
 @app.route("/api/key/<key>", methods=["DELETE"])
+@api
 def delete_key_view(key):
     ret = r.delete(key)
-    rsp = {
+    data = {
         "status": ret == 1,
     }
-    return jsonify(rsp)
+    return data
 
 
-app.run(host="localhost", port=8080, debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080, debug=True)

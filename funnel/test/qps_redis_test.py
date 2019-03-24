@@ -9,7 +9,7 @@ from funnel.qps_redis import qps_factory
 qps = qps_factory()
 
 
-@qps("1000001", "test", 100)
+@qps("1000001", "test", 10)
 def loop():
     print "current time is %f" % time.time()
 

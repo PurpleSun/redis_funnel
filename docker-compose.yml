@@ -1,0 +1,19 @@
+version: '3.2'
+services:
+  redis:
+    image: "redis:5.0.4"
+    command: --port 6379
+    expose:
+      - "6379"
+    ports:
+      - "6379:6379"
+  funnel_mgmt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - redis
+    expose:
+      - "8080"
+    ports:
+      - "8080:8080"
