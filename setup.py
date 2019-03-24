@@ -3,9 +3,15 @@
 # Author: fanwei.zeng
 # Time: 2019/3/24 22:27
 from setuptools import setup, find_packages
+import os
+
+with open(os.path.join(os.path.dirname(__file__), "README.md")) as f:
+    long_description = f.read()
 
 setup(
     name="redis-funnel",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     url="TBD",
     version="0.0.1",
     keywords=("distributed", "funnel", "redis"),
@@ -17,5 +23,5 @@ setup(
     packages=find_packages(),
     package_data={},
     include_package_data=True,
-    platforms="any",
+    platforms="any"
 )
