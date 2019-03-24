@@ -1,0 +1,2 @@
+include funnel/funnel.lua
+include funnel/test/get.lua
