@@ -12,7 +12,6 @@ def timeit(f):
     }
 
     def wrapper(*args, **kwargs):
-
         elapsed = time.time()
         ret = f(*args, **kwargs)
         elapsed = (time.time() - elapsed) * 1000

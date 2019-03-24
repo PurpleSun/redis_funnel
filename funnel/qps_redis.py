@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Author: fanwei.zeng
-# Time: 2019/3/23 17:22
+# Time: 2019/3/24 12:51
 from functools import wraps
 import time
+import os
 
 import redis
 
-from timeit import timeit
+from funnel.timeit import timeit
 
 
 def qps_factory(host="localhost", port=6379, db=0):
@@ -15,7 +16,9 @@ def qps_factory(host="localhost", port=6379, db=0):
         pool = redis.ConnectionPool(host=host, port=port, db=db)
         r = redis.Redis(connection_pool=pool)
 
-        with open("funnel.lua") as script:
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        filename = os.path.join(dir_path, "funnel.lua")
+        with open(filename) as script:
             lua = script.read()
         funnel = r.register_script(lua)
         funnel = timeit(funnel)
@@ -37,15 +40,3 @@ def qps_factory(host="localhost", port=6379, db=0):
             return inner
         return outer
     return _qps
-
-
-qps = qps_factory()
-
-
-@qps("1000002", "delete", 50)
-def loop():
-    print "current time is %f" % time.time()
-
-
-while True:
-    loop()

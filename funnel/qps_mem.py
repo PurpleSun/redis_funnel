@@ -67,12 +67,3 @@ def qps(n):
         return inner
 
     return outer
-
-
-@qps(10000)
-def loop():
-    print "current time is %f" % time.time()
-
-
-while True:
-    loop()

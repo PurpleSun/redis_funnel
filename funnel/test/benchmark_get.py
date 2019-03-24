@@ -4,7 +4,7 @@
 # Time: 2019/3/23 17:22
 import redis
 
-from timeit import timeit
+from funnel.timeit import timeit
 
 with open("get.lua") as script:
     lua = script.read()
