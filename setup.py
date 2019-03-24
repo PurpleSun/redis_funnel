@@ -12,7 +12,7 @@ setup(
     name="redis-funnel",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="TBD",
+    url="https://github.com/PurpleSun/redis_funnel",
     version="0.0.1",
     keywords=("distributed", "funnel", "redis"),
     description="A distributed funnel system based on redis, management system included.",
