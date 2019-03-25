@@ -7,6 +7,7 @@ from functools import wraps
 from flask import jsonify
 
 from redis_funnel.mgmt.util import Chunk
+from redis_funnel.mgmt import error
 
 
 def api(f):
@@ -14,7 +15,13 @@ def api(f):
     def wrapper(*args, **kwargs):
         try:
             data = f(*args, **kwargs)
-            chunk = Chunk(code=20000, msg=None, data=data).get()
+            if isinstance(data, dict):
+                chunk = Chunk(code=20000, msg=None, data=data).get()
+                return jsonify(chunk)
+            else:
+                return data
+        except error.MgmtClientException as e:
+            chunk = Chunk(code=e.code, msg=e.msg, data=None).get()
             return jsonify(chunk)
         except Exception as e:
             chunk = Chunk(code=50000, msg=e.message, data=None).get()

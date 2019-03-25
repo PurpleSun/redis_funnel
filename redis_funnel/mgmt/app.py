@@ -2,30 +2,107 @@
 # -*- coding: utf-8 -*-
 # Author: fanwei.zeng
 # Time: 2019/3/24 10:44
-from flask import Flask
+import time
+from functools import wraps
+
+from flask import Flask, request, make_response, jsonify
 import redis
 
 from redis_funnel.mgmt.config import REDIS
 from redis_funnel.mgmt.decorator import api
+from redis_funnel.mgmt import error
+from redis_funnel.mgmt.config import ACCOUNTS
+from redis_funnel.mgmt.session import Session
+from redis_funnel.mgmt.util import Chunk
 
 
 app = Flask(__name__)
 
 pool = redis.ConnectionPool(host=REDIS["HOST"], port=REDIS["PORT"], db=REDIS["DB"])
 r = redis.Redis(connection_pool=pool)
+session = Session(r)
+SESSION_ID = "session_id"
+
+
+def auth(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        session_id = request.cookies.get(SESSION_ID)
+        if session_id is None:
+            raise error.NOT_LOGIN_ERROR
+
+        user = session.get(session_id)
+        if user is None:
+            raise error.SESSION_EXPIRED_ERROR
+
+        request.user = user
+        return f(*args, **kwargs)
+
+    return wrapper
 
 
 @app.route("/", methods=["GET"])
 @api
-def hello():
+def index():
     data = {
         "ping": "pong",
     }
     return data
 
 
+@app.route("/login", methods=["POST"])
+@api
+def login():
+    session_id = request.cookies.get(SESSION_ID)
+    if session_id is not None:
+        user = session.get(session_id)
+        if user is not None:
+            return {
+                "user": user
+            }
+
+    username = request.form.get("username")
+    password = request.form.get("password")
+    if username is None or password is None:
+        raise error.USERNAME_PASSWORD_ABSENCE_ERROR
+    if username not in ACCOUNTS:
+        raise error.INVALID_USERNAME_ERROR
+    if password != ACCOUNTS.get(username):
+        raise error.INVALID_PASSWORD_ERROR
+
+    session_id = Session.gen_session_id()
+    session_content = {
+        "username": username,
+        "login_ts": time.time()
+    }
+    session.set(session_id, session_content)
+
+    data = {
+        "user": session_content
+    }
+    chunk = Chunk(code=20000, msg=None, data=data).get()
+    res = make_response(jsonify(chunk))
+    res.set_cookie(SESSION_ID, session_id, max_age=3600 * 24)
+    return res
+
+
+@app.route("/logout", methods=["GET"])
+@api
+def logout():
+    session_id = request.cookies.get(SESSION_ID)
+    cnt = None
+    if session_id is not None:
+        cnt = session.delete(session_id)
+
+    data = {
+        "success": cnt == 1
+    }
+    return data
+
+
 @app.route("/api/group", methods=["GET"])
 @api
+@auth
 def get_group_view():
     name = "funnel:groups"
     group_list = list(r.smembers(name))
@@ -38,6 +115,7 @@ def get_group_view():
 
 @app.route("/api/group/<group>", methods=["GET"])
 @api
+@auth
 def get_group_keys_view(group):
     name = 'funnel:' + group + ':keys'
     key_members = r.smembers(name)
@@ -57,6 +135,7 @@ def get_group_keys_view(group):
 
 @app.route("/api/key/<key>", methods=["GET"])
 @api
+@auth
 def get_key_view(key):
     funnel = r.hgetall(key)
     funnel = {key: float(value) for key, value in funnel.iteritems()}
@@ -69,6 +148,7 @@ def get_key_view(key):
 
 @app.route("/api/key/<key>", methods=["DELETE"])
 @api
+@auth
 def delete_key_view(key):
     ret = r.delete(key)
     data = {
