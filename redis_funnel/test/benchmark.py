@@ -1,18 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Author: fanwei.zeng
-# Time: 2019/3/23 17:22
+# Time: 2019/3/23 23:28
 import redis
 
-from funnel.timeit import timeit
-
-with open("get.lua") as script:
-    lua = script.read()
+from redis_funnel.timeit import timeit
 
 pool = redis.ConnectionPool(host='localhost', port=6379, db=0)
 r = redis.Redis(connection_pool=pool)
-get = r.register_script(lua)
-get = timeit(get)
-
+r.get = timeit(r.get)
 while True:
-    print get(keys=["name"])
+    print r.get("name")

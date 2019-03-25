@@ -6,7 +6,7 @@ from functools import wraps
 
 from flask import jsonify
 
-from funnel.mgmt.util import Chunk
+from redis_funnel.mgmt.util import Chunk
 
 
 def api(f):

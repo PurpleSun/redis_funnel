@@ -8,7 +8,7 @@ import os
 
 import redis
 
-from funnel.timeit import timeit
+from redis_funnel.timeit import timeit
 
 
 class Funnel(object):

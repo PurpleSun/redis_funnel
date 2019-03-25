@@ -4,7 +4,7 @@
 # Time: 2019/3/24 13:08
 import time
 
-from funnel.local import qps
+from redis_funnel.local import qps
 
 
 @qps(10)

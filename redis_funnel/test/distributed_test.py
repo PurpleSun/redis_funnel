@@ -4,7 +4,7 @@
 # Time: 2019/3/23 17:22
 import time
 
-from funnel.distributed import qps_factory
+from redis_funnel.distributed import qps_factory
 
 qps = qps_factory()
 

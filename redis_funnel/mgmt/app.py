@@ -5,8 +5,8 @@
 from flask import Flask
 import redis
 
-from funnel.mgmt.config import REDIS
-from funnel.mgmt.decorator import api
+from redis_funnel.mgmt.config import REDIS
+from redis_funnel.mgmt.decorator import api
 
 
 app = Flask(__name__)

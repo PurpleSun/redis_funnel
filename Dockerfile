@@ -10,6 +10,6 @@ COPY etc/pip.conf /etc/pip.conf
 RUN pip install -r requirements.txt
 
 ENV PYTHONPATH $PYTHONPATH:/site
-CMD ["python", "funnel/mgmt/app.py"]
+CMD ["python", "redis_funnel/mgmt/app.py"]
 
 EXPOSE 8080
