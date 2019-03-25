@@ -46,9 +46,19 @@ function Funnel:watering(quota)
     self:make_space(quota)
     if self.left_quota >= quota then
         self.left_quota = self.left_quota - quota
-        return 0
+        return
+            0,
+            self.capacity,
+            self.left_quota,
+            tostring(-1.0),
+            tostring((self.capacity - self.left_quota) / self.leaking_rate)
     else
-        return 1
+        return
+            1,
+            self.capacity,
+            self.left_quota,
+            tostring(quota / self.leaking_rate),
+            tostring((self.capacity - self.left_quota) / self.leaking_rate)
     end
 end
 
@@ -74,14 +84,7 @@ else
 end
 
 local funnel = Funnel:new(nil, capacity, operations, seconds, left_quota, leaking_ts)
-local ready = funnel:watering(quota)
-local interval
-if ready == 0 then
-    interval = tostring(-1.0)
-else
-    interval = tostring(quota / funnel.leaking_rate)
-end
-local empty_time = tostring((capacity - funnel.left_quota) / funnel.leaking_rate)
+local ready, capacity, left_quota, interval, empty_time = funnel:watering(quota)
 
 redis.call('HMSET', key,
     'left_quota', funnel.left_quota,
@@ -90,8 +93,7 @@ redis.call('HMSET', key,
     'operations', funnel.operations,
     'seconds', funnel.seconds
 )
-
 redis.call('SADD', 'funnel:groups', group)
 redis.call('SADD', 'funnel:' .. group .. ':keys', key)
 
-return {ready, capacity, funnel.left_quota, interval, empty_time}
+return {ready, capacity, left_quota, interval, empty_time}

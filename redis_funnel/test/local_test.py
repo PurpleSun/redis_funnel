@@ -7,7 +7,7 @@ import time
 from redis_funnel.local import qps
 
 
-@qps(10)
+@qps(100)
 def loop():
     print "current time is %f" % time.time()
 

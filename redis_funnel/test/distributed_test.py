@@ -9,7 +9,7 @@ from redis_funnel.distributed import qps_factory
 qps = qps_factory()
 
 
-@qps("1000001", "test", 10)
+@qps("1000001", "test", 100)
 def loop():
     print "current time is %f" % time.time()
 

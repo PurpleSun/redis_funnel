@@ -43,8 +43,12 @@ class Funnel(object):
         return watering
 
     def watering(self, quota):
-        return self._watering(keys=[self.group, self.key],
-                              args=[self.capacity, self.operations, self.seconds, quota])
+        ready, capacity, left_quota, interval, empty_time = self._watering(
+            keys=[self.group, self.key],
+            args=[self.capacity, self.operations, self.seconds, quota])
+        interval = float(interval)
+        empty_time = float(empty_time)
+        return ready, capacity, left_quota, interval, empty_time
 
 
 def qps_factory(host="localhost", port=6379, db=0):
