@@ -10,6 +10,6 @@ COPY etc/pip.conf /etc/pip.conf
 RUN pip install -r requirements.txt
 
 ENV PYTHONPATH $PYTHONPATH:/site
-CMD ["python", "redis_funnel/mgmt/app.py"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "redis_funnel.mgmt.app:app"]
 
 EXPOSE 8080
