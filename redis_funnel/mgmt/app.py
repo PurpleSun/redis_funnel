@@ -82,7 +82,7 @@ def login():
     }
     chunk = Chunk(code=20000, msg=None, data=data).get()
     res = make_response(jsonify(chunk))
-    res.set_cookie(SESSION_ID, session_id, max_age=3600 * 24)
+    res.set_cookie(SESSION_ID, session_id, max_age=3600 * 24, httponly=True)
     return res
 
 
