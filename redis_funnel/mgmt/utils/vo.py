@@ -12,12 +12,15 @@ class Chunk(object):
 
     def set_code(self, code):
         self.code = code
+        return self
 
     def set_msg(self, msg):
         self.msg = msg
+        return self
 
     def set_data(self, data):
         self.data = data
+        return self
 
     def get(self):
         return {

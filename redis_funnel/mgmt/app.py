@@ -8,19 +8,19 @@ from functools import wraps
 from flask import Flask, request, make_response, jsonify
 import redis
 
-from redis_funnel.mgmt.config import REDIS
-from redis_funnel.mgmt.decorator import api
-from redis_funnel.mgmt import error
-from redis_funnel.mgmt.config import ACCOUNTS
-from redis_funnel.mgmt.session import Session
-from redis_funnel.mgmt.util import Chunk
+from redis_funnel.mgmt.config import REDIS, ACCOUNTS, SESSION_EXPIRES
+from redis_funnel.mgmt.utils import error
+from redis_funnel.mgmt.utils.session import Session
+from redis_funnel.mgmt.utils.decorator import api
+from redis_funnel.mgmt.utils.vo import Chunk
+from redis_funnel.mgmt.utils import code
 
 
 app = Flask(__name__)
 
 pool = redis.ConnectionPool(host=REDIS["HOST"], port=REDIS["PORT"], db=REDIS["DB"])
 r = redis.Redis(connection_pool=pool)
-session = Session(r)
+session = Session(r, expires=SESSION_EXPIRES)
 SESSION_ID = "session_id"
 
 
@@ -70,19 +70,17 @@ def login():
     if password != ACCOUNTS.get(username):
         raise error.INVALID_PASSWORD_ERROR
 
-    session_id = Session.gen_session_id()
-    session_content = {
+    user = {
         "username": username,
         "login_ts": time.time()
     }
-    session.set(session_id, session_content)
-
+    session_id = session.set(user)
     data = {
-        "user": session_content
+        "user": user
     }
-    chunk = Chunk(code=20000, msg=None, data=data).get()
+    chunk = Chunk(code=code.OK, msg=None, data=data).get()
     res = make_response(jsonify(chunk))
-    res.set_cookie(SESSION_ID, session_id, max_age=3600 * 24, httponly=True)
+    res.set_cookie(SESSION_ID, session_id, max_age=SESSION_EXPIRES, httponly=True)
     return res
 
 
@@ -117,7 +115,7 @@ def get_group_view():
 @api
 @auth
 def get_group_keys_view(group):
-    name = 'funnel:' + group + ':keys'
+    name = "funnel:" + group + ":keys"
     key_members = r.smembers(name)
     funnel_list = []
     for key in key_members:

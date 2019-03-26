@@ -7,17 +7,23 @@ import uuid
 
 
 class Session(object):
-    def __init__(self, redis, expires=3600 * 24, prefix="session:"):
+    def __init__(self, redis, expires=3600 * 24, prefix="session"):
         self.redis = redis
         self.expires = expires
         self.prefix = prefix
 
-    def _key(self, session_id):
-        return self.prefix + session_id
+    @staticmethod
+    def _gen_session_id():
+        return uuid.uuid4().hex
 
-    def set(self, session_id, session_content):
-        self.redis.set(self._key(session_id), json.dumps(session_content))
+    def _key(self, session_id):
+        return ":".join([self.prefix, session_id])
+
+    def set(self, user):
+        session_id = Session._gen_session_id()
+        self.redis.set(self._key(session_id), json.dumps(user))
         self.redis.expire(session_id, self.expires)
+        return session_id
 
     def get(self, session_id):
         data = self.redis.get(self._key(session_id))
@@ -28,7 +34,3 @@ class Session(object):
 
     def delete(self, session_id):
         return self.redis.delete(self._key(session_id))
-
-    @staticmethod
-    def gen_session_id():
-        return uuid.uuid4().hex
