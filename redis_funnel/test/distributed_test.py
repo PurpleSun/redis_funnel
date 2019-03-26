@@ -39,7 +39,7 @@ class TestDistributedQps(unittest.TestCase):
                 f()
                 count += 1
 
-            real_qps = count / float(seconds)
+            real_qps = count / seconds
             print "%s,%s" % (max_qps, real_qps)
             self.assertTrue(real_qps <= max_qps)
 
