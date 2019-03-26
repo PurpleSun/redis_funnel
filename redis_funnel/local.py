@@ -7,15 +7,22 @@ from functools import wraps
 
 
 class Funnel(object):
-    def __init__(self, capacity, operations, seconds, left_quota=None, leaking_ts=None):
-        self.capacity = capacity  # 漏斗容量
+    """Local funnel base don memory.
+    """
+
+    def __init__(self, capacity, operations, seconds, left_quota=0, leaking_ts=None):
+        """
+        :param capacity: <int> max capacity of funnel
+        :param operations: <int> max operations permitted in specified seconds
+        :param seconds: <int> time window for max operations permitted, with second unit
+        :param left_quota: <float> left quota of funnel
+        :param leaking_ts: <float> latest leaking timestamp, default None
+        """
+        self.capacity = capacity
         self.operations = operations
         self.seconds = seconds
-        if left_quota is not None:
-            self.left_quota = left_quota  # 漏斗剩余空间
-        else:
-            self.left_quota = capacity    # 漏斗剩余空间
-        self.leaking_ts = leaking_ts or time.time()  # 上一次漏水时间
+        self.left_quota = left_quota
+        self.leaking_ts = leaking_ts or time.time()
         self.leaking_rate = operations / float(seconds)
 
     def _make_space(self, quota):
@@ -31,6 +38,15 @@ class Funnel(object):
         self.leaking_ts = now_ts  # 记录漏水时间
 
     def watering(self, quota):
+        """
+        :param quota: water quota
+        :return: a tuple with 5 members, name it as ret
+          ret[0]: <bool> return True if there has enough left quota, else False
+          ret[1]: <int> funnel capacity
+          ret[2]: <float> funnel left quota after watering
+          ret[3]: <float> -1 if ret[0] is True, else waiting time until there have enough left quota to watering
+          ret[4]: <float> waiting time until the funnel is empty
+        """
         self._make_space(quota)
         if self.left_quota >= quota:  # 判断剩余空间是否足够
             self.left_quota -= quota
@@ -52,6 +68,10 @@ class Funnel(object):
 
 
 def qps(n):
+    """
+    :param n: max qps
+    :return: decorated function
+    """
     funnel = Funnel(n, n, 1, left_quota=0)
 
     def outer(f):
