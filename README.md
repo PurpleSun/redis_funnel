@@ -1,6 +1,6 @@
 # redis-funnel
 
-A distributed funnel middleware based on redis, management ui included.
+A distributed funnel middleware based on redis, management UI included.
 
 ## Installation
 
