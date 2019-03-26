@@ -9,6 +9,9 @@ import os
 import redis
 
 
+__all__ = ("Funnel", "qps_factory")
+
+
 class Funnel(object):
     """Distributed funnel based on redis.
     """

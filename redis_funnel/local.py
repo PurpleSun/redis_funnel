@@ -6,6 +6,9 @@ import time
 from functools import wraps
 
 
+__all__ = ("Funnel", "qps")
+
+
 class Funnel(object):
     """Local funnel based on memory.
     """
