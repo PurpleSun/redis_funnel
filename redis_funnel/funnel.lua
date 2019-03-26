@@ -27,11 +27,11 @@ function Funnel:new(o, capacity, operations, seconds, left_quota, leaking_ts)
     return o
 end
 
-function Funnel:make_space()
+function Funnel:make_space(quota)
     local now_ts = now()
     local delta_ts = now_ts - self.leaking_ts
     local delta_quota = delta_ts * self.leaking_rate
-    if delta_quota < 1 then
+    if (self.left_quota + delta_quota) < quota then
         return
     else
         self.left_quota = self.left_quota + delta_quota
@@ -79,7 +79,7 @@ if cache[1] ~= false then
     end
     leaking_ts = cache[2]
 else
-    left_quota = capacity
+    left_quota = 0
     leaking_ts = now()
 end
 

@@ -11,15 +11,18 @@ class Funnel(object):
         self.capacity = capacity  # 漏斗容量
         self.operations = operations
         self.seconds = seconds
-        self.left_quota = left_quota or capacity  # 漏斗剩余空间
+        if left_quota is not None:
+            self.left_quota = left_quota  # 漏斗剩余空间
+        else:
+            self.left_quota = capacity    # 漏斗剩余空间
         self.leaking_ts = leaking_ts or time.time()  # 上一次漏水时间
         self.leaking_rate = operations / float(seconds)
 
-    def _make_space(self):
+    def _make_space(self, quota):
         now_ts = time.time()
         delta_ts = now_ts - self.leaking_ts  # 距离上一次漏水过去了多久
         delta_quota = delta_ts * self.leaking_rate  # 腾出的空间
-        if delta_quota < 1:  # 腾的空间过小等待下一次
+        if (self.left_quota + delta_quota) < quota:  # 腾的空间过小等待下一次
             return
 
         self.left_quota += delta_quota  # 增加剩余空间
@@ -28,7 +31,7 @@ class Funnel(object):
         self.leaking_ts = now_ts  # 记录漏水时间
 
     def watering(self, quota):
-        self._make_space()
+        self._make_space(quota)
         if self.left_quota >= quota:  # 判断剩余空间是否足够
             self.left_quota -= quota
             return (
@@ -49,7 +52,7 @@ class Funnel(object):
 
 
 def qps(n):
-    funnel = Funnel(n, n, 1)
+    funnel = Funnel(n, n, 1, left_quota=0)
 
     def outer(f):
         @wraps(f)
@@ -58,9 +61,7 @@ def qps(n):
             while True:
                 attempt += 1
                 ready, capacity, left_quota, interval, empty_time = funnel.watering(1)
-                print "interval: %f" % interval
                 if ready:
-                    print "attempt: %s" % attempt
                     return f(*args, **kwargs)
                 else:
                     time.sleep(interval)

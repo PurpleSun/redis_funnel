@@ -8,8 +8,6 @@ import os
 
 import redis
 
-from redis_funnel.timeit import timeit
-
 
 class Funnel(object):
     def __init__(self, group, key, capacity, operations, seconds,
@@ -39,7 +37,6 @@ class Funnel(object):
         with open(filename) as script:
             lua = script.read()
         watering = r.register_script(lua)
-        watering = timeit(watering)
         return watering
 
     def watering(self, quota):
@@ -62,10 +59,7 @@ def qps_factory(host="localhost", port=6379, db=0):
                 while True:
                     attempt += 1
                     ready, capacity, left_quota, interval, empty_time = funnel.watering(1)
-                    interval = float(interval)
-                    print "interval: %f" % interval
                     if ready == 0:
-                        print "attempt: %s" % attempt
                         return f(*args, **kwargs)
                     else:
                         time.sleep(interval)

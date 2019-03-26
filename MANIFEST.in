@@ -1,3 +1,2 @@
 include redis_funnel/funnel.lua
-include redis_funnel/test/get.lua
 include README.md
