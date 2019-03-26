@@ -4,6 +4,7 @@
 # Time: 2019/3/21 22:58
 import time
 from functools import wraps
+from threading import RLock
 
 
 __all__ = ("Funnel", "qps")
@@ -27,6 +28,7 @@ class Funnel(object):
         self.left_quota = left_quota
         self.leaking_ts = leaking_ts or time.time()
         self.leaking_rate = operations / float(seconds)
+        self._lock = RLock()
 
     def _make_space(self, quota):
         now_ts = time.time()
@@ -50,7 +52,12 @@ class Funnel(object):
           ret[3]: <float> -1 if ret[0] is True, else waiting time until there have enough left quota to watering
           ret[4]: <float> waiting time until the funnel is empty
         """
-        self._make_space(quota)
+        try:
+            self._lock.acquire()
+            self._make_space(quota)
+        finally:
+            self._lock.release()
+
         if self.left_quota >= quota:  # 判断剩余空间是否足够
             self.left_quota -= quota
             return (
