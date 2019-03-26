@@ -42,7 +42,7 @@ while True:
 
 > Warning: a redis server should be started first and listening on localhost:6379.
 
-Also, if function `dummy` just runs in a single process, then you can use `qps` decorator based on local memory, in this case you don't need a redis server running:
+Also, if function `dummy` just runs in a single process, then you can just use `qps` decorator based on local memory, in which case you don't need a redis server running first:
 
 ```python
 import time
