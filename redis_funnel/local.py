@@ -7,7 +7,7 @@ from functools import wraps
 
 
 class Funnel(object):
-    """Local funnel base don memory.
+    """Local funnel based on memory.
     """
 
     def __init__(self, capacity, operations, seconds, left_quota=0, leaking_ts=None):
