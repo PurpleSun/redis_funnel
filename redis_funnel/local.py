@@ -55,26 +55,25 @@ class Funnel(object):
         try:
             self._lock.acquire()
             self._make_space(quota)
+            if self.left_quota >= quota:  # 判断剩余空间是否足够
+                self.left_quota -= quota
+                return (
+                    True,
+                    self.capacity,
+                    self.left_quota,
+                    -1,
+                    (self.capacity - self.left_quota) / float(self.leaking_rate)
+                )
+            else:
+                return (
+                    False,
+                    self.capacity,
+                    self.left_quota,
+                    quota / float(self.leaking_rate),
+                    (self.capacity - self.left_quota) / float(self.leaking_rate)
+                )
         finally:
             self._lock.release()
-
-        if self.left_quota >= quota:  # 判断剩余空间是否足够
-            self.left_quota -= quota
-            return (
-                True,
-                self.capacity,
-                self.left_quota,
-                -1,
-                (self.capacity - self.left_quota) / float(self.leaking_rate)
-            )
-        else:
-            return (
-                False,
-                self.capacity,
-                self.left_quota,
-                quota / float(self.leaking_rate),
-                (self.capacity - self.left_quota) / float(self.leaking_rate)
-            )
 
 
 def qps(n):
