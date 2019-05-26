@@ -53,22 +53,16 @@ def index():
 @app.route("/login", methods=["POST"])
 @api
 def login():
-    session_id = request.cookies.get(SESSION_ID)
-    if session_id is not None:
-        user = session.get(session_id)
-        if user is not None:
-            return {
-                "user": user
-            }
-
     username = request.form.get("username")
     password = request.form.get("password")
     if username is None or password is None:
         raise error.USERNAME_PASSWORD_ABSENCE_ERROR
-    if username not in ACCOUNTS:
+    elif username not in ACCOUNTS:
         raise error.INVALID_USERNAME_ERROR
-    if password != ACCOUNTS.get(username):
+    elif password != ACCOUNTS.get(username):
         raise error.INVALID_PASSWORD_ERROR
+    else:
+        pass
 
     user = {
         "username": username,
