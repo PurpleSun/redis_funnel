@@ -28,6 +28,7 @@ class LoginPage extends Component {
           })
           if (res.code === 20000) {
             message.success("登录成功！")
+            this.props.history.push("/")
           } else {
             message.error("登录失败！")
           }
