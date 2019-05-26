@@ -33,6 +33,7 @@ lib/
 lib64/
 parts/
 sdist/
+
 var/
 wheels/
 *.egg-info/
@@ -119,3 +120,4 @@ venv.bak/
 .mypy_cache/
 .idea
 ~$benchmark.xlsx
+
