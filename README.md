@@ -58,7 +58,7 @@ while True:
 
 ## Management UI
 
-TBD
+![redis-funnel-group](https://raw.githubusercontent.com/PurpleSun/redis_funnel/master/img/redis-funnel-group.png)
 
 ## Author
 
