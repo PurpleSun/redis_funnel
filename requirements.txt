@@ -1,4 +1,4 @@
 Flask==1.0.2
 redis==3.2.1
 gunicorn==19.9.0
-eventlet==0.24.1
+eventlet==0.31.0
